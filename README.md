@@ -1,6 +1,19 @@
-\# APAN 5560 Assignment 1
+# APAN 5560 — Applied Generative AI
 
+This repository contains the cumulative coursework for APAN 5560.
+Assignment 2 extends the FastAPI application developed in Assignment 1.
 
+## Assignment Overview
+
+| Assignment | Implementation | API Endpoints |
+| --- | --- | --- |
+| Assignment 1 | Bigram text generation and spaCy word embeddings | POST /generate, POST /embedding |
+| Assignment 2 | CNN trained on CIFAR-10, with saved weights and Docker deployment | POST /predict-image |
+
+For Assignment 2, see the "Assignment 2: CIFAR-10 Image Classification"
+section below for the architecture, training results, and Docker commands.
+
+## Assignment 1
 
 A FastAPI application demonstrating bigram text generation and spaCy word embeddings.
 
