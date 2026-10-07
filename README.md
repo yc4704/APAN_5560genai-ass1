@@ -188,3 +188,100 @@ http://127.0.0.1:8000/docs
 
 Press `Ctrl+C` in the terminal to stop the container.
 
+## Assignment 2: CIFAR-10 Image Classification
+
+This assignment extends the existing FastAPI application with a
+CNN image classification endpoint. The text generation and word
+embedding endpoints from Assignment 1 are retained.
+
+### CNN Architecture
+
+- Input: RGB image resized to 64 × 64
+- Convolution: 3 input channels, 16 output channels, 3 × 3 kernel,
+  stride 1, padding 1
+- ReLU
+- Max pooling: 2 × 2 kernel, stride 2
+- Convolution: 16 input channels, 32 output channels, 3 × 3 kernel,
+  stride 1, padding 1
+- ReLU
+- Max pooling: 2 × 2 kernel, stride 2
+- Flatten: 32 × 16 × 16 = 8192 features
+- Fully connected: 8192 → 100
+- ReLU
+- Fully connected: 100 → 10 class scores
+
+### Training
+
+The model was trained on the CIFAR-10 training set for 5 epochs,
+using a batch size of 64, cross-entropy loss, and the Adam optimizer
+with a learning rate of 0.001.
+
+Preprocessing consists of resizing images to 64 × 64 and converting
+them to tensors.
+
+- Final training accuracy: 68.37%
+- Test accuracy: 63.61%
+- Saved weights: `models/cifar10_cnn.pth`
+
+The trained weights are included, so retraining is not required
+to run the API. Inference supports CPU execution.
+
+### Project Files
+
+- `helper_lib/model.py`: CNN architecture
+- `helper_lib/data_loader.py`: CIFAR-10 loading and preprocessing
+- `helper_lib/trainer.py`: training loop
+- `helper_lib/evaluator.py`: test-set evaluation
+- `train_cnn.py`: training and weight-saving script
+- `app/cnn_service.py`: weight loading and image inference
+- `app/main.py`: FastAPI endpoints
+
+### Run with Docker
+
+From the repository root, build the image:
+
+```bash
+docker build -t apan_5560genai:assignment2 .
+```
+
+Start the container:
+
+```bash
+docker run -p 127.0.0.1:8000:80 apan_5560genai:assignment2
+```
+
+Open http://127.0.0.1:8000/docs in a browser.
+
+### Image Classification Endpoint
+
+`POST /predict-image`
+
+Upload an image using the multipart form field named `file`.
+In Swagger UI, select **Try it out**, choose an image, and click
+**Execute**.
+
+Supported classes:
+
+airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck.
+
+Example response:
+
+```json
+{
+  "filename": "test_cifar10.png",
+  "class_index": 3,
+  "class_name": "cat",
+  "confidence": 0.6714
+}
+```
+
+Confidence is the softmax score of the predicted class, not a
+guarantee that the prediction is correct. Images outside the ten
+CIFAR-10 classes are still assigned one of these classes.
+
+### Verification
+
+The Dockerized endpoint was tested with the first CIFAR-10 test
+image, whose true label is `cat`. It returned HTTP 200 and predicted
+`cat` with a confidence score of approximately 0.6714.
+

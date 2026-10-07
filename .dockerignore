@@ -6,3 +6,10 @@ __pycache__/
 *.pyd
 .pytest_cache/
 .ipynb_checkpoints/
+
+# Local CIFAR-10 training dataset
+data/
+
+# Local test files and assignment documents
+test_cifar10.png
+Assignment*.pdf

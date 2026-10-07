@@ -8,3 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local training data and test files
+data/
+test_cifar10.png
+
+# Assignment documents are submitted separately
+Assignment*.pdf

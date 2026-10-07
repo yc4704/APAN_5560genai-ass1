@@ -1,14 +1,21 @@
-from fastapi import FastAPI, HTTPException
+from io import BytesIO
+
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field
 
 from app.bigram_model import BigramModel
+from app.cnn_service import predict_image
 from app.embedding_model import calculate_embedding
 
 
 app = FastAPI(
     title="Applied Generative AI API",
-    description="A FastAPI service for text generation and word embeddings.",
-    version="1.0.0",
+    description=(
+        "A FastAPI service for text generation, "
+        "word embeddings, and CIFAR-10 image classification."
+    ),
+    version="2.0.0",
 )
 
 
@@ -55,6 +62,7 @@ def generate_text(request: TextGenerationRequest):
         start_word=request.start_word,
         length=request.length,
     )
+
     return {"generated_text": generated_text}
 
 
@@ -72,4 +80,36 @@ def get_embedding(request: EmbeddingRequest):
         "word": request.word.strip(),
         "dimension": len(embedding),
         "embedding": embedding,
+    }
+
+
+@app.post("/predict-image")
+async def classify_image(
+    file: UploadFile = File(...),
+):
+    if (
+        file.content_type is None
+        or not file.content_type.startswith("image/")
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded file must be an image.",
+        )
+
+    image_bytes = await file.read()
+
+    try:
+        image = Image.open(BytesIO(image_bytes))
+        prediction = predict_image(image)
+    except (UnidentifiedImageError, OSError) as error:
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded file is not a valid image.",
+        ) from error
+    finally:
+        await file.close()
+
+    return {
+        "filename": file.filename,
+        **prediction,
     }
